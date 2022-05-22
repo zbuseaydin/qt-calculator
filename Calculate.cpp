@@ -7,7 +7,7 @@ long result = 0;                // stores the result of the operation in decimal
 bool addPressed = false;
 bool subPressed = false;
 bool endOfNum = false;
-bool ok;  // a dumb variable to use toLong method of QString for hexadecimal numbers
+bool ok;                        // a dumb variable to use toLong method of QString for hexadecimal numbers
 bool firstOperation = true;     // when the first operator (+ or -) is pressed, the first number given will be transferred to result
 
 Calculate::Calculate(QWidget *parent):
@@ -19,13 +19,15 @@ Calculate::Calculate(QWidget *parent):
     ui->Display->setText(QString::number(result));
 
     QPushButton *numButtons[16];
+    // connecting the released signal of buttons from 0 to 9 to the NumberPressed slot
     for(int i = 0; i < 10; i++){
-        QString butName = "button" + QString::number(i);            // button names should be like button0, ... button15 in .ui
+        QString butName = "button" + QString::number(i);
         numButtons[i] = Calculate::findChild<QPushButton *>(butName);
         connect(numButtons[i], SIGNAL(released()), this, SLOT(NumberPressed()));
     }
 
     int ch = 65;
+    // connecting the released signal of buttons from A to F to the NumberPressed slot
     for(int i = 10; i < 16; i++, ch++){
         QString butName = "button" + QString(QChar(ch));
         numButtons[i] = Calculate::findChild<QPushButton *>(butName);
@@ -83,9 +85,10 @@ void Calculate::MathButtonPressed(){
         // display the result of the last operation:
         ui->Display->setText(newDisplay);
     } else if(subPressed){
-        // result stores the previous value
         result = result - displayValue;
+
         QString newDisplay = QString::number(result, 16).toUpper();
+
         // display the result of the last operation:
         ui->Display->setText(newDisplay);
     }
@@ -119,7 +122,7 @@ void Calculate::EqualButtonPressed(){
     QString displayVal = ui->Display->text();
     long dblDisplayVal = displayVal.toLong(&ok, 16);    // displayed value in decimal
 
-    // process the last operation pressed:
+    // process the last operation pressed: (if there is no operation, result is the currently displayed value
     if(addPressed){
         result = result + dblDisplayVal;
     } else if(subPressed){
@@ -131,9 +134,16 @@ void Calculate::EqualButtonPressed(){
     // Put result in display
     ui->Display->setText(QString::number(result, 16).toUpper());
 
+    // when equal button is pressed, reset the operations
+    addPressed = false;
+    subPressed = false;
+    firstOperation = true;
+    result = 0;
+    endOfNum = true;
 }
 
 
+// displays an empty string, clears previous operations and resets the result
 void Calculate::ClearPressed(){
     ui->Display->setText("");
     addPressed = false;
